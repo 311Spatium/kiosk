@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>311 영어도서관 출퇴근 체크</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body { height: 100%; width: 100%; }
+
+body {
+  font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  background: #f5f4f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.kiosk {
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 400px;
+  padding: 32px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888780;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  width: 100%;
+  text-align: center;
+}
+
+.display {
+  width: 100%;
+  background: #f5f4f0;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 16px;
+  padding: 18px 24px;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.display-label { font-size: 12px; color: #888780; font-weight: 500; }
+
+.display-code {
+  font-size: 40px;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: 0.25em;
+  font-family: monospace;
+}
+
+.display-code.placeholder { color: #B4B2A9; }
+
+.error-msg {
+  font-size: 13px;
+  color: #A32D2D;
+  text-align: center;
+  height: 20px;
+  font-weight: 500;
+  width: 100%;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.key {
+  background: #f5f4f0;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 16px;
+  height: 80px;
+  font-size: 28px;
+  font-weight: 500;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: background 0.08s, transform 0.08s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: inherit;
+}
+
+.key:active { background: #D3D1C7; transform: scale(0.95); }
+.key.del { font-size: 20px; color: #5F5E5A; }
+.key.zero { grid-column: 2; }
+
+.btn-submit {
+  width: 100%;
+  height: 64px;
+  border-radius: 16px;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.08s;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-submit.active { background: #1D9E75; color: #ffffff; }
+.btn-submit.inactive {
+  background: #f5f4f0;
+  color: #B4B2A9;
+  cursor: not-allowed;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+.btn-submit.active:active { transform: scale(0.98); opacity: 0.9; }
+
+/* 결과 화면 */
+.result-area {
+  width: 100%;
+  border-radius: 16px;
+  padding: 32px 16px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.result-area.checkin  { background: #E1F5EE; }
+.result-area.checkout { background: #FAEEDA; }
+.result-area.warning  { background: #FCEBEB; }
+
+.result-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  font-family: inherit;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.result-icon.checkin  { background: #1D9E75; color: #ffffff; }
+.result-icon.checkout { background: #BA7517; color: #ffffff; }
+.result-icon.warning  { background: #A32D2D; color: #ffffff; font-size: 30px; }
+
+.result-name {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+.result-type { font-size: 16px; font-weight: 500; text-align: center; }
+.result-type.checkin  { color: #0F6E56; }
+.result-type.checkout { color: #854F0B; }
+.result-type.warning  { color: #A32D2D; }
+
+.result-sub {
+  font-size: 13px;
+  color: #5F5E5A;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.result-time { font-size: 13px; color: #5F5E5A; text-align: center; }
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progress-fill { height: 100%; border-radius: 2px; transition: width 0.1s linear; }
+.progress-fill.checkin  { background: #1D9E75; }
+.progress-fill.checkout { background: #BA7517; }
+.progress-fill.warning  { background: #A32D2D; }
+
+.time-display {
+  font-size: 11px;
+  color: #B4B2A9;
+  text-align: center;
+  width: 100%;
+}
+</style>
+</head>
+<body>
+
+<div class="kiosk">
+
+  <div class="logo">311 영어도서관</div>
+
+  <div id="main-view" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:20px;">
+    <div class="display">
+      <div class="display-label">전화번호 뒤 4자리 입력</div>
+      <div class="display-code placeholder" id="display-code">_ _ _ _</div>
+    </div>
+    <div class="error-msg" id="error-msg"></div>
+    <div class="keypad">
+      <button class="key" onclick="pressKey('1')">1</button>
+      <button class="key" onclick="pressKey('2')">2</button>
+      <button class="key" onclick="pressKey('3')">3</button>
+      <button class="key" onclick="pressKey('4')">4</button>
+      <button class="key" onclick="pressKey('5')">5</button>
+      <button class="key" onclick="pressKey('6')">6</button>
+      <button class="key" onclick="pressKey('7')">7</button>
+      <button class="key" onclick="pressKey('8')">8</button>
+      <button class="key" onclick="pressKey('9')">9</button>
+      <button class="key del" onclick="pressDelete()">&#9003;</button>
+      <button class="key zero" onclick="pressKey('0')">0</button>
+    </div>
+    <button class="btn-submit inactive" id="btn-submit" onclick="submit()">출퇴근 체크</button>
+  </div>
+
+  <div id="result-view" style="width:100%;display:none;">
+    <div class="result-area" id="result-area">
+      <div class="result-icon" id="result-icon"></div>
+      <div class="result-name" id="result-name"></div>
+      <div class="result-type" id="result-type"></div>
+      <div class="result-sub"  id="result-sub"></div>
+      <div class="result-time" id="result-time"></div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:100%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="time-display" id="time-display"></div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   설정 영역 — 원장님이 직접 수정
+═══════════════════════════════════════ */
+
+const WEBHOOK_URL = 'https://hook.eu1.make.com/kyx27v5tmlubklnv8jt3ffy9mq7sxq6a';
+
+const TEACHERS = {
+  '3337': '김수현',
+  '5942': 'Annie 김서연',
+  '8364': 'Christina 곽현빈',
+  '9906': 'Jen 송시은',
+  '8031': 'Jules 김유정',
+  '2401': 'Lina 권려경',
+  '8797': 'Liz 하누리',
+  '5464': 'Minji 김민지',
+  '0588': 'Regina 김고은',
+  '5469': 'Sage 함세영',
+  '7603': 'Song 윤송이',
+  '6132': 'Sophie 박서빈',
+  '9586': 'Yolly 이예진',
+  '2250': 'Yuni 조윤서',
+  /* 추가: '번호': '이름', */
+};
+
+const RESET_DELAY = 3000;     // 결과 화면 유지 시간 (ms)
+const WARNING_DELAY = 4000;   // 경고 화면 유지 시간 (ms)
+
+/* ═══════════════════════════════════════
+   시스템 코드
+═══════════════════════════════════════ */
+
+let code = '';
+let checkedInToday = {};
+let progressInterval = null;
+let isClicking = false;
+
+function todayKey() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function getClickCount(code) {
+  return parseInt(localStorage.getItem(code + '_' + todayKey()) || '0');
+}
+
+function incrementClickCount(code) {
+  const key = code + '_' + todayKey();
+  localStorage.setItem(key, getClickCount(code) + 1);
+}
+
+function pressKey(n) {
+  if (code.length >= 4) return;
+  code += n;
+  updateDisplay();
+}
+
+function pressDelete() {
+  code = code.slice(0, -1);
+  updateDisplay();
+  clearError();
+}
+
+function updateDisplay() {
+  const el = document.getElementById('display-code');
+  const chars = code.split('');
+  while (chars.length < 4) chars.push('_');
+  el.textContent = chars.join(' ');
+  el.classList.toggle('placeholder', code.length === 0);
+
+  const btn = document.getElementById('btn-submit');
+  btn.classList.toggle('inactive', code.length < 4);
+  btn.classList.toggle('active', code.length === 4);
+}
+
+function clearError() {
+  document.getElementById('error-msg').textContent = '';
+}
+
+function submit() {
+  if (code.length !== 4) return;
+
+  const name = TEACHERS[code];
+  if (!name) {
+    document.getElementById('error-msg').textContent = '등록되지 않은 번호예요. 다시 확인해 주세요.';
+    code = '';
+    updateDisplay();
+    return;
+  }
+
+  clearError();
+
+  // ── 하루 2회 초과 방어막 ──
+  if (getClickCount(code) >= 2) {
+    showWarning(name);
+    return;
+  }
+
+  // ── 더블클릭 방어막 ──
+  if (isClicking) return;
+  isClicking = true;
+  setTimeout(() => { isClicking = false; }, 3000);
+
+  const isCheckedIn = checkedInToday[code];
+  const type = isCheckedIn ? '퇴근' : '출근';
+  checkedInToday[code] = !isCheckedIn;
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+  const dateStr = now.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
+
+  sendToMake(code, name, type, now);
+  incrementClickCount(code);
+  showResult(name, type, dateStr + ' ' + timeStr);
+}
+
+function sendToMake(code, name, type, time) {
+  if (WEBHOOK_URL === 'YOUR_MAKE_WEBHOOK_URL_HERE') return;
+  fetch(WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code, name, type, timestamp: time.toISOString() })
+  }).catch(() => {});
+}
+
+function showResult(name, type, timeStr) {
+  document.getElementById('main-view').style.display = 'none';
+  document.getElementById('result-view').style.display = 'block';
+
+  const isCheckin = type === '출근';
+  const cls = isCheckin ? 'checkin' : 'checkout';
+
+  document.getElementById('result-area').className = 'result-area ' + cls;
+
+  const icon = document.getElementById('result-icon');
+  icon.className = 'result-icon ' + cls;
+  icon.textContent = isCheckin ? '출근' : '퇴근';
+
+  document.getElementById('result-name').textContent = name + ' 선생님';
+  document.getElementById('result-sub').textContent = '';
+
+  const typeEl = document.getElementById('result-type');
+  typeEl.textContent = type + ' 완료';
+  typeEl.className = 'result-type ' + cls;
+
+  document.getElementById('result-time').textContent = timeStr;
+
+  const fill = document.getElementById('progress-fill');
+  fill.className = 'progress-fill ' + cls;
+  fill.style.width = '100%';
+
+  startProgress(RESET_DELAY);
+  setTimeout(() => { clearInterval(progressInterval); resetScreen(); }, RESET_DELAY);
+}
+
+function showWarning(name) {
+  document.getElementById('main-view').style.display = 'none';
+  document.getElementById('result-view').style.display = 'block';
+
+  document.getElementById('result-area').className = 'result-area warning';
+
+  const icon = document.getElementById('result-icon');
+  icon.className = 'result-icon warning';
+  icon.textContent = '!';
+
+  document.getElementById('result-name').textContent = name + ' 선생님';
+
+  const typeEl = document.getElementById('result-type');
+  typeEl.textContent = '오늘 출퇴근이 완료되었어요';
+  typeEl.className = 'result-type warning';
+
+  document.getElementById('result-sub').textContent = '출근과 퇴근은 하루 각 1회만 처리돼요.\n문의는 원장님께 말씀해 주세요.';
+  document.getElementById('result-time').textContent = '';
+
+  const fill = document.getElementById('progress-fill');
+  fill.className = 'progress-fill warning';
+  fill.style.width = '100%';
+
+  startProgress(WARNING_DELAY);
+  setTimeout(() => { clearInterval(progressInterval); resetScreen(); }, WARNING_DELAY);
+
+  code = '';
+  updateDisplay();
+}
+
+function startProgress(delay) {
+  clearInterval(progressInterval);
+  const fill = document.getElementById('progress-fill');
+  let progress = 100;
+  const step = 100 / (delay / 100);
+  progressInterval = setInterval(() => {
+    progress -= step;
+    fill.style.width = Math.max(0, progress) + '%';
+  }, 100);
+}
+
+function resetScreen() {
+  code = '';
+  updateDisplay();
+  clearError();
+  document.getElementById('main-view').style.display = 'flex';
+  document.getElementById('result-view').style.display = 'none';
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('time-display').textContent = now.toLocaleString('ko-KR', {
+    month: 'long', day: 'numeric', weekday: 'short',
+    hour: '2-digit', minute: '2-digit'
+  });
+  if (now.getHours() === 0 && now.getMinutes() === 0) {
+    checkedInToday = {};
+  }
+}
+
+updateClock();
+setInterval(updateClock, 30000);
+</script>
+</body>
+</html>
