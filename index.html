@@ -352,9 +352,11 @@ function submit() {
   isClicking = true;
   setTimeout(() => { isClicking = false; }, 3000);
 
-  const isCheckedIn = checkedInToday[code];
-  const type = isCheckedIn ? '퇴근' : '출근';
-  checkedInToday[code] = !isCheckedIn;
+  const storageKey = 'checkin_' + code + '_' + todayKey();
+const isCheckedIn = localStorage.getItem(storageKey) === 'true';
+const type = isCheckedIn ? '퇴근' : '출근';
+localStorage.setItem(storageKey, (!isCheckedIn).toString());
+checkedInToday[code] = !isCheckedIn;
 
   const now = new Date();
   const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
@@ -460,7 +462,11 @@ function updateClock() {
     hour: '2-digit', minute: '2-digit'
   });
   if (now.getHours() === 0 && now.getMinutes() === 0) {
-    checkedInToday = {};
+  checkedInToday = {};
+  Object.keys(localStorage).forEach(k => {
+    if (k.startsWith('checkin_')) localStorage.removeItem(k);
+  });
+}
   }
 }
 
