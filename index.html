@@ -6,9 +6,7 @@
 <title>311 영어도서관 출퇴근 체크</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
 html, body { height: 100%; width: 100%; }
-
 body {
   font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
   background: #f5f4f0;
@@ -18,7 +16,6 @@ body {
   min-height: 100vh;
   padding: 20px;
 }
-
 .kiosk {
   background: #ffffff;
   border-radius: 24px;
@@ -31,7 +28,6 @@ body {
   align-items: center;
   gap: 20px;
 }
-
 .logo {
   font-size: 12px;
   font-weight: 600;
@@ -41,7 +37,6 @@ body {
   width: 100%;
   text-align: center;
 }
-
 .display {
   width: 100%;
   background: #f5f4f0;
@@ -53,9 +48,7 @@ body {
   flex-direction: column;
   gap: 6px;
 }
-
 .display-label { font-size: 12px; color: #888780; font-weight: 500; }
-
 .display-code {
   font-size: 40px;
   font-weight: 600;
@@ -63,9 +56,7 @@ body {
   letter-spacing: 0.25em;
   font-family: monospace;
 }
-
 .display-code.placeholder { color: #B4B2A9; }
-
 .error-msg {
   font-size: 13px;
   color: #A32D2D;
@@ -74,14 +65,12 @@ body {
   font-weight: 500;
   width: 100%;
 }
-
 .keypad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   width: 100%;
 }
-
 .key {
   background: #f5f4f0;
   border: 1px solid rgba(0,0,0,0.08);
@@ -99,11 +88,9 @@ body {
   -webkit-user-select: none;
   font-family: inherit;
 }
-
 .key:active { background: #D3D1C7; transform: scale(0.95); }
 .key.del { font-size: 20px; color: #5F5E5A; }
 .key.zero { grid-column: 2; }
-
 .btn-submit {
   width: 100%;
   height: 64px;
@@ -118,7 +105,6 @@ body {
   align-items: center;
   justify-content: center;
 }
-
 .btn-submit.active { background: #1D9E75; color: #ffffff; }
 .btn-submit.inactive {
   background: #f5f4f0;
@@ -127,8 +113,6 @@ body {
   border: 1px solid rgba(0,0,0,0.08);
 }
 .btn-submit.active:active { transform: scale(0.98); opacity: 0.9; }
-
-/* 결과 화면 */
 .result-area {
   width: 100%;
   border-radius: 16px;
@@ -138,11 +122,9 @@ body {
   align-items: center;
   gap: 12px;
 }
-
 .result-area.checkin  { background: #E1F5EE; }
 .result-area.checkout { background: #FAEEDA; }
 .result-area.warning  { background: #FCEBEB; }
-
 .result-icon {
   width: 72px;
   height: 72px;
@@ -155,34 +137,17 @@ body {
   margin-bottom: 4px;
   font-family: inherit;
   text-align: center;
-  line-height: 1.2;
 }
-
 .result-icon.checkin  { background: #1D9E75; color: #ffffff; }
 .result-icon.checkout { background: #BA7517; color: #ffffff; }
 .result-icon.warning  { background: #A32D2D; color: #ffffff; font-size: 30px; }
-
-.result-name {
-  font-size: 22px;
-  font-weight: 600;
-  color: #1a1a1a;
-  text-align: center;
-}
-
+.result-name { font-size: 22px; font-weight: 600; color: #1a1a1a; text-align: center; }
 .result-type { font-size: 16px; font-weight: 500; text-align: center; }
 .result-type.checkin  { color: #0F6E56; }
 .result-type.checkout { color: #854F0B; }
 .result-type.warning  { color: #A32D2D; }
-
-.result-sub {
-  font-size: 13px;
-  color: #5F5E5A;
-  text-align: center;
-  line-height: 1.6;
-}
-
+.result-sub { font-size: 13px; color: #5F5E5A; text-align: center; line-height: 1.6; }
 .result-time { font-size: 13px; color: #5F5E5A; text-align: center; }
-
 .progress-bar {
   width: 100%;
   height: 4px;
@@ -191,24 +156,16 @@ body {
   overflow: hidden;
   margin-top: 8px;
 }
-
 .progress-fill { height: 100%; border-radius: 2px; transition: width 0.1s linear; }
 .progress-fill.checkin  { background: #1D9E75; }
 .progress-fill.checkout { background: #BA7517; }
 .progress-fill.warning  { background: #A32D2D; }
-
-.time-display {
-  font-size: 11px;
-  color: #B4B2A9;
-  text-align: center;
-  width: 100%;
-}
+.time-display { font-size: 11px; color: #B4B2A9; text-align: center; width: 100%; }
 </style>
 </head>
 <body>
 
 <div class="kiosk">
-
   <div class="logo">311 영어도서관</div>
 
   <div id="main-view" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:20px;">
@@ -247,7 +204,6 @@ body {
   </div>
 
   <div class="time-display" id="time-display"></div>
-
 </div>
 
 <script>
@@ -275,29 +231,38 @@ const TEACHERS = {
   /* 추가: '번호': '이름', */
 };
 
-const RESET_DELAY = 3000;     // 결과 화면 유지 시간 (ms)
-const WARNING_DELAY = 4000;   // 경고 화면 유지 시간 (ms)
+const RESET_DELAY   = 3000;
+const WARNING_DELAY = 4000;
 
 /* ═══════════════════════════════════════
    시스템 코드
 ═══════════════════════════════════════ */
 
 let code = '';
-let checkedInToday = {};
 let progressInterval = null;
-let isClicking = false;
+let isSubmitting = false;
 
 function todayKey() {
   return new Date().toISOString().split('T')[0];
 }
 
-function getClickCount(code) {
-  return parseInt(localStorage.getItem(code + '_' + todayKey()) || '0');
+/* localStorage 기반 출근/퇴근 상태 관리 */
+function getCheckinState(code) {
+  return localStorage.getItem('state_' + code + '_' + todayKey()) || 'none';
+  // 'none' = 아직 아무것도 안 찍음
+  // 'checkin' = 출근만 찍음
+  // 'done' = 출근 + 퇴근 모두 찍음
 }
 
-function incrementClickCount(code) {
-  const key = code + '_' + todayKey();
-  localStorage.setItem(key, getClickCount(code) + 1);
+function setCheckinState(code, state) {
+  localStorage.setItem('state_' + code + '_' + todayKey(), state);
+}
+
+function clearTodayStorage() {
+  const today = todayKey();
+  Object.keys(localStorage).forEach(k => {
+    if (k.includes('_' + today)) localStorage.removeItem(k);
+  });
 }
 
 function pressKey(n) {
@@ -330,6 +295,7 @@ function clearError() {
 
 function submit() {
   if (code.length !== 4) return;
+  if (isSubmitting) return;
 
   const name = TEACHERS[code];
   if (!name) {
@@ -341,29 +307,26 @@ function submit() {
 
   clearError();
 
-  // ── 하루 2회 초과 방어막 ──
-  if (getClickCount(code) >= 2) {
+  const state = getCheckinState(code);
+
+  /* 이미 출근+퇴근 모두 완료된 경우 */
+  if (state === 'done') {
     showWarning(name);
     return;
   }
 
-  // ── 더블클릭 방어막 ──
-  if (isClicking) return;
-  isClicking = true;
-  setTimeout(() => { isClicking = false; }, 3000);
+  isSubmitting = true;
+  setTimeout(() => { isSubmitting = false; }, 3000);
 
-  const storageKey = 'checkin_' + code + '_' + todayKey();
-const isCheckedIn = localStorage.getItem(storageKey) === 'true';
-const type = isCheckedIn ? '퇴근' : '출근';
-localStorage.setItem(storageKey, (!isCheckedIn).toString());
-checkedInToday[code] = !isCheckedIn;
+  const type = (state === 'none') ? '출근' : '퇴근';
+  const nextState = (type === '출근') ? 'checkin' : 'done';
+  setCheckinState(code, nextState);
 
   const now = new Date();
   const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
   const dateStr = now.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
 
   sendToMake(code, name, type, now);
-  incrementClickCount(code);
   showResult(name, type, dateStr + ' ' + timeStr);
 }
 
@@ -384,25 +347,17 @@ function showResult(name, type, timeStr) {
   const cls = isCheckin ? 'checkin' : 'checkout';
 
   document.getElementById('result-area').className = 'result-area ' + cls;
-
   const icon = document.getElementById('result-icon');
   icon.className = 'result-icon ' + cls;
   icon.textContent = isCheckin ? '출근' : '퇴근';
-
   document.getElementById('result-name').textContent = name + ' 선생님';
   document.getElementById('result-sub').textContent = '';
-
   const typeEl = document.getElementById('result-type');
   typeEl.textContent = type + ' 완료';
   typeEl.className = 'result-type ' + cls;
-
   document.getElementById('result-time').textContent = timeStr;
 
-  const fill = document.getElementById('progress-fill');
-  fill.className = 'progress-fill ' + cls;
-  fill.style.width = '100%';
-
-  startProgress(RESET_DELAY);
+  startProgress(cls, RESET_DELAY);
   setTimeout(() => { clearInterval(progressInterval); resetScreen(); }, RESET_DELAY);
 }
 
@@ -411,34 +366,28 @@ function showWarning(name) {
   document.getElementById('result-view').style.display = 'block';
 
   document.getElementById('result-area').className = 'result-area warning';
-
   const icon = document.getElementById('result-icon');
   icon.className = 'result-icon warning';
   icon.textContent = '!';
-
   document.getElementById('result-name').textContent = name + ' 선생님';
-
   const typeEl = document.getElementById('result-type');
   typeEl.textContent = '오늘 출퇴근이 완료되었어요';
   typeEl.className = 'result-type warning';
-
   document.getElementById('result-sub').textContent = '출근과 퇴근은 하루 각 1회만 처리돼요.\n문의는 원장님께 말씀해 주세요.';
   document.getElementById('result-time').textContent = '';
 
-  const fill = document.getElementById('progress-fill');
-  fill.className = 'progress-fill warning';
-  fill.style.width = '100%';
-
-  startProgress(WARNING_DELAY);
+  startProgress('warning', WARNING_DELAY);
   setTimeout(() => { clearInterval(progressInterval); resetScreen(); }, WARNING_DELAY);
 
   code = '';
   updateDisplay();
 }
 
-function startProgress(delay) {
+function startProgress(cls, delay) {
   clearInterval(progressInterval);
   const fill = document.getElementById('progress-fill');
+  fill.className = 'progress-fill ' + cls;
+  fill.style.width = '100%';
   let progress = 100;
   const step = 100 / (delay / 100);
   progressInterval = setInterval(() => {
@@ -461,13 +410,7 @@ function updateClock() {
     month: 'long', day: 'numeric', weekday: 'short',
     hour: '2-digit', minute: '2-digit'
   });
-  if (now.getHours() === 0 && now.getMinutes() === 0) {
-  checkedInToday = {};
-  Object.keys(localStorage).forEach(k => {
-    if (k.startsWith('checkin_')) localStorage.removeItem(k);
-  });
-}
-  }
+  if (now.getHours() === 0 && now.getMinutes() === 0) clearTodayStorage();
 }
 
 updateClock();
